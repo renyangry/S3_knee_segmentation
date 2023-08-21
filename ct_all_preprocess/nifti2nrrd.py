@@ -5,6 +5,8 @@ import glob
 import logger
 from collections import OrderedDict
 import numpy as np
+from utils import check_path_exist
+
 
 def nii2nrrd(nifti_img_path,output_path,out_fn=None):
     if not nifti_img_path.endswith('.nii.gz'):
@@ -30,14 +32,6 @@ def nii2nrrd(nifti_img_path,output_path,out_fn=None):
         output = np.flip(image.get_fdata(),axis=(0,1))
         nrrd.write(os.path.join(output_path,out_fn),output,nrrd_header_dict)
 
-def check_path_exist(path_):
-    if not os.path.exists(path_):
-        # Create the path
-        os.makedirs(path_)
-        print(f"Path '{path_}' created.")
-    else:
-        print(f"Path '{path_}' already exists.")
-
 
 data_root = '/home/rgu/Documents/'
 which_dataset = 'UK dataset'
@@ -48,6 +42,6 @@ for pt in range(len(image_path)):
     nii2nrrd(image_path[pt],nrrd_output_path,None)
     # print(' '.join([os.path.split(image_path[pt])[1],'done']))
 
-# print('Done')
+print('Done')
 
 
