@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  s3kneesegmentation:
+    image: s3kneesegmentation
+    build:
+      context: .
+      dockerfile: ./Dockerfile

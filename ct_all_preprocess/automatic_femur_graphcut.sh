@@ -13,7 +13,7 @@ for input_file in "$input_directory"/*; do
 
     output_file="${output_directory}/seg_${base_name}"
 
-    python3 run_automated_segmentation.py --input "$input_file" --output "$output_file"
+    time python3 run_automated_segmentation.py --input "$input_file" --output "$output_file"
 
     echo "Completed: $output_file"
 done

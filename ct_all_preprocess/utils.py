@@ -2,6 +2,7 @@ import os
 import numpy as np
 import nibabel as nib
 from scipy import ndimage as ndi
+from scipy.ndimage import label
 
 
 def global_threshold_mask(raw_img, lower_threshold, upper_threshold):
@@ -67,3 +68,38 @@ def check_num_of_pt_4eval(manual_path, automated_path):
         print("Pass: Detected same number of segmentations in two folders.")
     except AssertionError:
         print("Error: The number of segmentations doesn't match in two folders.")
+
+
+def bone_seg_separation(img, seg_value):
+    mask_img = np.zeros_like(img)
+    if seg_value is None:
+        return mask_img
+    else:
+        mask_img[img == seg_value] = 1
+        return mask_img
+
+def clean_up_seg(seg_img,size_threshold):
+    labelled_volume, num_features = label(seg_img)  
+    if num_features > 1:    
+        sizes = np.bincount(labelled_volume.ravel())
+        bone_sizes: Optional[bool] = (sizes > size_threshold)
+        bone_sizes[0] = 0
+        seg_img = bone_sizes[labelled_volume]
+    labelled_volume1, num_features1 = label(seg_img)
+    print(f"Number of connected components of cleaned segmentation: {num_features1}")
+    return seg_img
+
+def single_bone_seg_process(seg_img, threshold_list, idx_list, output_path, prefix):
+    for idx in idx_list:
+        seg = nib.load(seg_img[idx]).get_fdata()
+        right_seg, left_seg = split_img(seg)
+
+        if 'left' in prefix: 
+            single_bone = bone_seg_separation(left_seg, threshold_list[idx])
+        elif 'right' in prefix:
+            single_bone = bone_seg_separation(right_seg, threshold_list[idx])
+        if 'tibia' in prefix: 
+            cleaned_bone = clean_up_seg(single_bone, 1000) * 2
+        else: 
+            cleaned_bone = clean_up_seg(single_bone, 1000)
+        nii_file_writer(seg_img[idx], cleaned_bone, prefix, output_path)

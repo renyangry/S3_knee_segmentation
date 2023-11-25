@@ -1,0 +1,7 @@
+{
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.extraPaths": [
+        "./ct_all_preprocess"
+    ],
+    "python.analysis.autoImportCompletions": true
+}

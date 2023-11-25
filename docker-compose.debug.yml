@@ -1,0 +1,11 @@
+version: '3.4'
+
+services:
+  s3kneesegmentation:
+    image: s3kneesegmentation
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 supervised/3d_unet_training.py "]
+    ports:
+      - 5678:5678
