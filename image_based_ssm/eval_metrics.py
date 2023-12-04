@@ -38,20 +38,26 @@ for bone in BONE_STRUCTURE:
                 ref_nib = nib.load(os.path.join(test_dir, filename))
                 # ref_img = ref_nib.get_fdata()
                 resampled_ref_nib = nibproc.resample_to_output(ref_nib, (1,1,1))
-                ref_img = resampled_ref_nib.get_fdata()
+                
+                # find the first slice number with non-zero pixel for distal femur computation
+                # slice_num = 0
+                # while np.sum(resampled_ref_nib.get_fdata()[:,:,slice_num]) == 0:
+                #     slice_num += 1
+                ref_img = resampled_ref_nib.get_fdata()#[:,:,slice_num:(slice_num+150)]
                 
                 ref_img[ref_img < 0.5] = 0
                 ref_img[ref_img > 0.5] = 1
                 rec_nib = nib.load(os.path.join(results_dir, filename))
                 # rec_img = rec_nib.get_fdata()
                 resampled_rec_nib = nibproc.resample_to_output(rec_nib, (1,1,1))
-                rec_img = resampled_rec_nib.get_fdata()
+                rec_img = resampled_rec_nib.get_fdata()#[:,:,slice_num:(slice_num+150)]
                 
                 rec_img[rec_img < 0.5] = 0
                 rec_img[rec_img > 0.5] = 1
                 
                 # computing DSC
                 dsc = dice_coef(ref_img, rec_img)
+                # print(f'the DSC is {dsc}')
 
                 # computing max Hausdorff distance between the reference and reconstructed images
                 ref_image = sitk.GetImageFromArray(ref_img)
@@ -67,7 +73,8 @@ for bone in BONE_STRUCTURE:
                 rec_coords = np.array(np.where(rec_surface_array == 1)).T
 
                 hausdorff_dist = (directed_hausdorff(ref_coords, rec_coords)[0] + directed_hausdorff(rec_coords, ref_coords)[0])/2
-
+                # print(f'the max Hausdorff distance is {hausdorff_dist}')
+                
                 # computing the 95% Hausdorff distance
                 # SignedDanielssonDistanceMap/  SignedMaurerDistanceMap selected
                 seg_distance_map = sitk.Abs(
@@ -80,16 +87,18 @@ for bone in BONE_STRUCTURE:
                 dist_ref = sitk.GetArrayViewFromImage(reference_segmentation_distance_map)[
                     sitk.GetArrayViewFromImage(rec_surface) == 1]
                 hd_95 = (np.percentile(dist_ref, 95) + np.percentile(dist_seg, 95)) / 2.0
+                # print(f'the 95% Hausdorff distance is {hd_95}')
                 HD_rmse = (np.sqrt(np.mean(dist_ref ** 2)) + np.sqrt(np.mean(dist_seg ** 2))) / 2.0
+                # print(f'the Hausdorff RMSE is {HD_rmse}')
                 
                 # compute RMSE
                 rmse = np.sqrt(mean_squared_error(ref_img, rec_img))
                 # print(f'the RMSE is {rmse}')   
                                  
                 # saving difference image
-                diff = ref_img -rec_img
-                diff_img = nib.Nifti1Image(diff, ref_nib.affine, ref_nib.header)
-                nib.save(diff_img, os.path.join(results_dir, 'diff_'+filename))
+                # diff = ref_img -rec_img
+                # diff_img = nib.Nifti1Image(diff, ref_nib.affine, ref_nib.header)
+                # nib.save(diff_img, os.path.join(results_dir, 'diff_'+filename))
             
                 # save RMSE and DSC to csv file
                 with open(os.path.join(OUT_DIR, 'eval_metric_resampled.csv'), 'a') as f:

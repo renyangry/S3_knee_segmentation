@@ -1,11 +1,15 @@
 import os 
 import ants
 import json
+import glob
 import nibabel as nib
 import nibabel.processing as nibproc
-from skimage.measure import marching_cubes #marching_cubes_lewiner
+from skimage.measure import marching_cubes#, marching_cubes_lewiner
 import numpy as np
 from stl import mesh
+from pycpd import RigidRegistration, AffineRegistration, DeformableRegistration
+import trimesh
+
 
 
 def save_training_json(moving_train_dir, original_train_dir, json_path):
@@ -17,66 +21,102 @@ def save_training_json(moving_train_dir, original_train_dir, json_path):
         json.dump({'ssm_list': left_femur_list}, f)
 
 
-# def interpolate_all_masks(JSON_PATH, out_path): 
-#     with open(JSON_PATH, 'r') as f:
-#         paths = json.load(f)
-#     os.makedirs(out_path, exist_ok=True)
-#     for cur_path in paths["ssm_list"]:
-#         print(cur_path)
-#         cur_filename = os.path.basename(cur_path)
-#         cur_im = nib.load(cur_path)
-#         resampled_im = nibproc.resample_to_output(cur_im, (1,1,1))
-#         nib.save(resampled_im, os.path.join(out_path, cur_filename))
-
-
 def extract_femur(im, label):
     # im = ants.image_read(path)
-    mask_img = ants.utils.get_mask(im,label,label+1)
+    mask_img = ants.utils.get_mask(im, label, label+1)
     cropped = ants.utils.crop_image(mask_img, mask_img)
     resampled = ants.resample_image(cropped, [1,1,1])
-    padded = ants.utils.pad_image(resampled,pad_width=[(20, 20), (20, 20), (20, 20)])
+    # smoothed = ants.utils.smooth_image(resampled, 1.5)
+    padded = ants.utils.pad_image(resampled, pad_width=[(20, 20), (20, 20), (20, 20)])
     return padded
 
 
 def convert_binary2mesh(im, filename, out_path):
     os.makedirs(out_path, exist_ok=True)
 
-    # smoothed = mcubes.smooth(im, method='gaussian')
-    # vertices, triangles, _, _ = marching_cubes_lewiner(im, 0, allow_degenerate=False)
-    # because sitk images have z direction first, we must swap x and z coordinates
-    # vertices = vertices[:, ::-1]
-    # convert pixel coordinates to world coordinates using the image's affine
-    # vertices = np.transpose(vertices)
-    # ones = np.ones((1, vertices.shape[1]))
-    # vertices = np.concatenate([vertices, ones])
-    # vertices = np.matmul(affine, vertices)
-    # vertices = vertices[:3,:]
-    # vertices = np.transpose(vertices)
-    # # save the resulting set of vertices and triangles
-    # mesh = trimesh.Trimesh(vertices=vertices, faces=triangles)
-    # mesh_name = os.path.basename(filename).split('.')[0] + '.stl'
-    # mesh.export(os.path.join(out_path, mesh_name))
-
-    # fig = plt.figure(figsize=(10, 10))
-    # ax = fig.add_subplot(111, projection='3d')
-    # # Fancy indexing: `verts[faces]` to generate a collection of triangles
-    # mesh = Poly3DCollection(vertices[triangles])
-    # mesh.set_edgecolor('k')
-    # ax.add_collection3d(mesh)
-    # ax.set_xlabel("x-axis: a = 6 per ellipsoid")
-    # ax.set_ylabel("y-axis: b = 10")
-    # ax.set_zlabel("z-axis: c = 16")
-    # ax.set_xlim(0, 24)  # a = 6 (times two for 2nd ellipsoid)
-    # ax.set_ylim(0, 20)  # b = 10
-    # ax.set_zlim(0, 32)  # c = 16
-
-    # plt.tight_layout()
-    # plt.show()
-
     verts, faces, normals, values = marching_cubes(im, 0)
-    obj_3d = mesh.Mesh(np.zeros(faces.shape[0], dtype=mesh.Mesh.dtype))
+    # for i, f in enumerate(faces):
+    #     for j in range(faces.shape[1]):
+    #         obj_3d.vectors[i][j] = verts[f[j]]
+    
+    obj_3d = trimesh.Trimesh(vertices=verts, faces = faces)
 
-    for i, f in enumerate(faces):
-        obj_3d.vectors[i] = verts[f]
     mesh_name = os.path.basename(filename).split('.')[0] + '.stl'
-    obj_3d.save(os.path.join(out_path, mesh_name))
+    obj_3d.export(os.path.join(out_path, mesh_name))   
+    
+    
+def simplify_mesh(in_path, out_path, bin_path, factor):
+# Fast-Quadric-Mesh Simplication
+    mesh_path = glob.glob(os.path.join(in_path, '*.stl'))
+    os.makedirs(out_path, exist_ok=True)
+
+    for stl_filename in mesh_path: 
+        cur_filename = os.path.basename(stl_filename)
+        out_file = os.path.join(out_path, cur_filename)
+        os.system(bin_path + ' ' + stl_filename + ' ' + out_file + ' ' + str(factor))
+    
+    
+def scale_mesh(mesh, factor=.1):
+
+    vertices = mesh.vertices - mesh.bounding_box.centroid
+    distances = np.linalg.norm(vertices, axis=1)
+    vertices /= np.max(distances)
+    vertices *= factor
+    return trimesh.Trimesh(vertices=vertices, faces=mesh.faces)
+
+def rigid_reg_meshes(ref_mesh, mov_mesh):
+    # input need to be coordinates of vertices
+    anchor_vertices = np.asarray(ref_mesh.vertices)
+    moving_vertices = np.asarray(mov_mesh.vertices)
+    reg = RigidRegistration(X=anchor_vertices, Y=moving_vertices)
+    reg.register()
+
+    new_vertices = reg.TY
+    new_mesh = trimesh.Trimesh(vertices=new_vertices, faces=mov_mesh.faces)
+    scale = reg.s
+    rotation_ = reg.R.tolist()
+    translation_ = reg.t.tolist()
+    trans_dict = {
+            's': scale,
+            'R': rotation_,
+            't': translation_,
+            }
+    return new_mesh, trans_dict
+
+
+def affine_reg_meshes(ref_mesh, mov_mesh):
+    # input need to be coordinates of vertices
+    anchor_vertices = np.asarray(ref_mesh.vertices)
+    moving_vertices = np.asarray(mov_mesh.vertices)
+    reg = AffineRegistration(X=anchor_vertices, Y=moving_vertices)
+    reg.register()
+
+    new_vertices = reg.TY
+    new_mesh = trimesh.Trimesh(vertices=new_vertices, faces=mov_mesh.faces)
+    B_ = reg.B
+    translation_ = reg.t.tolist()
+    trans_dict = {
+            'B': B_,
+            't': translation_,
+            }
+    return new_mesh, trans_dict
+
+
+def deformable_reg_meshes(ref_mesh, mov_mesh):
+    # input need to be coordinates of vertices
+    anchor_vertices = np.asarray(ref_mesh.vertices)
+    moving_vertices = np.asarray(mov_mesh.vertices)
+    reg = DeformableRegistration(X=anchor_vertices, Y=moving_vertices)
+    reg.register()
+
+    new_vertices = reg.TY
+    new_mesh = trimesh.Trimesh(vertices=new_vertices, faces=mov_mesh.faces)
+    B_ = reg.B
+    translation_ = reg.t.tolist()
+    trans_dict = {
+            'B': B_,
+            't': translation_,
+            }
+    return new_mesh, trans_dict
+
+# scaling mesh vertices

@@ -7,7 +7,7 @@ from ssm_config import *
 import pandas as pd
 
 
-df = pd.read_csv(os.path.join(OUT_DIR,'eval_metric_resampled.csv'))
+df = pd.read_csv(os.path.join(OUT_DIR,'eval_metric_resampled_d.csv'))
 plt.figure(figsize=(15, 5))
 plt.subplot(1, 4, 1)
 sns.stripplot(x='INPUT TYPE', y='DSC', data=df, hue='FILENAME', palette='Set3')
@@ -27,7 +27,7 @@ sns.stripplot(x='INPUT TYPE', y='HDrmse', data=df, hue='FILENAME', palette='Set3
 plt.title('RMSE of Hausdorff Distance')
 
 plt.tight_layout()
-plt.savefig(os.path.join(OUT_DIR, 'eval_metric_resampled.png'))
+plt.savefig(os.path.join(OUT_DIR, 'eval_metric_resampled_d.png'))
 plt.show()
 plt.close()
 
@@ -52,7 +52,7 @@ sns.boxplot(x='INPUT TYPE', y='HDrmse', data=df, palette='Set3')
 plt.title('RMSE of Hausdorff Distance')
 
 plt.tight_layout()
-plt.savefig(os.path.join(OUT_DIR, 'eval_metric_resampled_boxplot.png'))
+plt.savefig(os.path.join(OUT_DIR, 'eval_metric_resampled_boxplot_d.png'))
 plt.show()
 plt.close()
 
