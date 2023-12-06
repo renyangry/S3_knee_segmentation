@@ -26,13 +26,13 @@ class RecSSM(object):
 
 
 	def reg(self, fix_img, moving_img):
-		outs = ants.registration(fix_img, moving_img, type_of_transforme='QuickRigid')
+		outs = ants.registration(fix_img, moving_img, type_of_transforme='Similarity') #QuickRigid /
 		warped_img = outs['warpedmovout']
 		return outs
 
 	
 	def inverse_reg(self, fixed1, moving1, moving2):
-		outs1 = ants.registration(fixed1, moving1, type_of_transforme='rigid')
+		outs1 = ants.registration(fixed1, moving1, type_of_transforme='Similarity')
 		outs2 = ants.apply_transforms(moving1, moving2, transformlist=outs1['invtransforms'])
 		outs2 = outs2.numpy()
 		outs2[outs2 < 0] = 0

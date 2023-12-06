@@ -88,11 +88,8 @@ train_label = ["{}".format(item.split('/')[-1]) for item in train_label]
 #         print(f'Error: {filename} is not start with left_ or right_')
 #         sys.exit()
 
-# test_image_dir = [test_left_image_dir, test_right_image_dir]
-# test_image = []
-# for dir in test_image_dir:
-    # test_image += sorted(glob.glob(os.path.join(dir, "*.nii.gz")))
-# test_image = ["{}".format(item.split('/')[-1]) for item in test_image]
+test_image = sorted(glob.glob(os.path.join(data_root, which_dataset, 'nnUNet_testing', "*.nii.gz")))
+test_image = ["{}".format(item.split('/')[-1]) for item in test_image]
 
 
 
@@ -111,8 +108,8 @@ json_dict['labels'] = {
     }
 
 json_dict['numTraining'] = len(train_image)
-# json_dict['numTest'] = len(test_image)
+json_dict['numTest'] = len(test_image)
 json_dict['training'] = [{'image': "./imagesTr/%s" % i, "label": "./labelsTr/%s" % i} for i in train_label]
-# json_dict['test'] = ["./imagesTs/%s" % i for i in test_image]
+json_dict['test'] = ["./imagesTs/%s" % i for i in test_image]
 with open(os.path.join(data_root, which_dataset, 'nnUNet_raw', training_dataset, "dataset.json"), 'w') as f:
     json.dump(json_dict, f)

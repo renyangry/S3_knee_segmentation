@@ -104,18 +104,24 @@ nnunet_image_dir = os.path.join(data_root, 'UK dataset', 'nnUNet_raw', training_
 # rename_img_file_nnunet(output_path_side, nnunet_image_dir)
 
 
-addtional_label = sorted(glob.glob(os.path.join(data_root, 'UK dataset', 'nnUNet_raw', 'testing_dual_label', '*.nii.gz')))
-addtional_image = sorted(glob.glob(os.path.join(data_root, 'UK dataset', 'nnUNet_testing', '*.nii.gz')))
-for image_file in addtional_image:
-    shutil.copy(image_file, nnunet_image_dir)
-for label_file in addtional_label:
-    shutil.copy(label_file, nnunet_label_dir)
-print('Additional data copied')
+# 04/12/23: removed because unstable quality of generated segmentation in testing_dual_label
+# addtional_label = sorted(glob.glob(os.path.join(data_root, 'UK dataset', 'nnUNet_raw', 'testing_dual_label', '*.nii.gz')))
+# addtional_image = sorted(glob.glob(os.path.join(data_root, 'UK dataset', 'nnUNet_testing', '*.nii.gz')))
+# for image_file in addtional_image:
+#     shutil.copy(image_file, nnunet_image_dir)
+# for label_file in addtional_label:
+#     shutil.copy(label_file, nnunet_label_dir)
+# print('Additional data copied')
+##############################################################################################################
+
 
 train_image = sorted(glob.glob(os.path.join(nnunet_image_dir, "*.nii.gz")))
 train_label = sorted(glob.glob(os.path.join(nnunet_label_dir, "*.nii.gz")))
 train_image = ["{}".format(item.split('/')[-1]) for item in train_image]
 train_label = ["{}".format(item.split('/')[-1]) for item in train_label]
+
+test_image = sorted(glob.glob(os.path.join(data_root, 'UK dataset', 'nnUNet_testing', "*.nii.gz")))
+test_image = ["{}".format(item.split('/')[-1]) for item in test_image]
 
 print('Creating json file...')
 json_dict = OrderedDict()
@@ -129,13 +135,12 @@ json_dict['labels'] = {
     "background": "0",
     "femur": "1",
     "tibia": "2",
-    # "partial_label": "3",
     }
 
 json_dict['numTraining'] = len(train_image)
-# json_dict['numTest'] = len(test_image)
+json_dict['numTest'] = len(test_image)
 json_dict['training'] = [{'image': "./imagesTr/%s" % i, "label": "./labelsTr/%s" % i} for i in train_label]
-# json_dict['test'] = ["./imagesTs/%s" % i for i in test_image]
+json_dict['test'] = ["./imagesTs/%s" % i for i in test_image]
 with open(os.path.join(data_root, 'UK dataset', 'nnUNet_raw', training_dataset, "dataset.json"), 'w') as f:
     json.dump(json_dict, f)
 print('Json file created')

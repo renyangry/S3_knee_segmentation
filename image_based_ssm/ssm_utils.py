@@ -84,9 +84,10 @@ def save_training_json(moving_train_dir, json_path):
 	
 
 def check_path_exist(path_):
-    if not os.path.exists(path_):
-        os.makedirs(path_)
-        print(f"Path '{path_}' created.")
-    else:
-        print(f"Path '{path_}' already exists.")
+    os.makedirs(path_, exist_ok=True)
 
+def compute_efficiency(start_time, end_time):
+    elapsed_time = end_time - start_time
+    minutes = int(elapsed_time // 60)
+    seconds = int(elapsed_time % 60)
+    return minutes, seconds
