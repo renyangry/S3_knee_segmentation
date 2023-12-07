@@ -3,7 +3,7 @@ import os
 
 
 BONE_STRUCTURE = ['left_femur', 'right_femur', 'left_tibia', 'right_tibia']
-CONDITION = ['proximal_only', 'add_distal','reduced_distal'] #
+CONDITION = ['proximal_only', 'add_distal', 'reduced_distal']
 
 ROOT_DIR = '/home/rgu/Documents'
 OUT_DIR = '/home/rgu/Documents/ssm_results'

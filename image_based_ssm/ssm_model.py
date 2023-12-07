@@ -55,9 +55,9 @@ class RecSSM(object):
 
 		# debug
 		# test = nib.Nifti1Image(self.mean_shape, affine=np.eye(4))
-		# nib.save(test, os.path.join('/home/rgu/Documents', 'ssm_meanshape.nii.gz'))
+		# nib.save(test, os.path.join('/home/rgu/Documents/ssm_results/left_femur', 'ssm_meanshape.nii.gz'))
 		# print('mean shape outputted for evaluation')
-
+		#
 		data = np.reshape(data, (len(complete), self.fix_img_x * self.fix_img_y * self.fix_img_z))
 		data_pca = pca.fit_transform(data)
 
@@ -93,6 +93,7 @@ class RecSSM(object):
 		lambda_n = np.transpose(lambda_n)
 		reconstructed = self.eigenvec.dot(lambda_n)
 		reconstructed = np.reshape(reconstructed, (self.fix_img_x, self.fix_img_y, self.fix_img_z))
+
 		if useOnlyMeanShape:
 			rec = self.mean_shape
 		else:

@@ -21,6 +21,6 @@ for bone in BONE_STRUCTURE:
         fixed_anatomy = ants.image_read(os.path.join(ROOT_DIR, bone + '.nii.gz'))
 
         # Test model
-        ssm_eval(model_dir, fixed_anatomy, test_dir, warped_test_dir, results_dir, cond)
+        ssm_eval(model_dir, fixed_anatomy, test_dir, warped_test_dir, results_dir, bone, cond)
             
     
