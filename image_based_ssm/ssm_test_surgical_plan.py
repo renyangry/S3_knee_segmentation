@@ -34,9 +34,11 @@ def test_ssm_surgical_plan(model_dir, fixed_anatomy, testing_dir, warped_test_di
         ## for surgical plan and mesh SSM testing
         ants.image_write(moving_left_femur, os.path.join(intermediate_dir,
                                                          filename_ts))
-        ##
+        ## just for validation 
+        if condition == 'full_length':
+            outs = model.reg(fixed_anatomy, moving_left_femur)
+        
         lf_shape = moving_left_femur.shape
-
         if condition == 'proximal_only':
             print('extract 150mm femur head volume from test images...')
             moving_femur_head = ants.utils.crop_indices(moving_left_femur, (0, 0, lf_shape[2]-volume_slice), lf_shape)

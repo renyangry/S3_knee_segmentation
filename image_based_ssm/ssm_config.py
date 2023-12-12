@@ -3,6 +3,7 @@ import os
 
 
 BONE_STRUCTURE = ['left_femur', 'right_femur', 'left_tibia', 'right_tibia']
+# CONDITION = ['full_length', 'proximal_only', 'add_distal', 'reduced_distal']
 CONDITION = ['proximal_only', 'add_distal', 'reduced_distal']
 
 ROOT_DIR = '/home/rgu/Documents'
