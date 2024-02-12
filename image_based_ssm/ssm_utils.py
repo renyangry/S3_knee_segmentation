@@ -6,7 +6,7 @@ import re
 import ants
 import numpy as np
 import gc
-
+import SimpleITK as sitk
 
 # def compute_min_max(label, execpt_axis):
 #     indices = np.nonzero(label.sum(axis=execpt_axis) > 0)[0]
@@ -19,9 +19,9 @@ def extract_one_bone(full_leg_seg, label):
     # y_min, y_max = compute_min_max(mask, (0, 2))
     # z_min, z_max = compute_min_max(mask, (0, 1))
     # cropped_new_arr = mask[x_min:x_max, y_min:y_max, z_min:z_max]
-    mask_img = ants.utils.get_mask(full_leg_seg,label,label+1)
+    mask_img = ants.utils.get_mask(full_leg_seg, label, label+1)
     fixed_cropped = ants.utils.crop_image(mask_img, mask_img)
-    cropped_padded = ants.utils.pad_image(fixed_cropped,pad_width=[(20, 20), (20, 20), (20, 20)])
+    cropped_padded = ants.utils.pad_image(fixed_cropped, pad_width=[(20, 20), (20, 20), (20, 20)])
     return cropped_padded
 
 
@@ -91,3 +91,20 @@ def compute_efficiency(start_time, end_time):
     minutes = int(elapsed_time // 60)
     seconds = int(elapsed_time % 60)
     return minutes, seconds
+
+def generate_surface_img(nifti_numpy):
+    ref_image = sitk.GetImageFromArray(nifti_numpy)
+    ref_image_int = sitk.Cast(ref_image, sitk.sitkUInt8)
+    ref_surface = sitk.LabelContour(ref_image_int)
+    ref_surface_array = sitk.GetArrayFromImage(ref_surface)
+    return ref_surface_array
+
+def transform_numpy2ants(original_ants, surface_array):
+    spacing = original_ants.spacing
+    origin = original_ants.origin
+    direction = original_ants.direction
+    surface_image = ants.from_numpy(surface_array)
+    surface_image.set_spacing(spacing)
+    surface_image.set_origin(origin)
+    surface_image.set_direction(direction)
+    return surface_image

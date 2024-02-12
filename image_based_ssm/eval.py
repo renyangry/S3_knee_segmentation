@@ -12,8 +12,7 @@ for bone in BONE_STRUCTURE:
         test_dir = TEST_DIRS[bone]
         model_dir = RESULTS_DIRS[bone]
         warped_test_dir = WARPED_DIRS[bone][cond]
-        results_dir = RESULTS_DIRS_TESTING[bone][cond]
-
+        results_dir = RESULTS_DIRS_TESTING[bone][cond]+'1'
 
         check_path_exist(warped_test_dir)
         check_path_exist(results_dir)

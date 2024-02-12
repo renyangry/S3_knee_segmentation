@@ -13,5 +13,6 @@ nnUNetv2_plan_and_preprocess -d 1000 -c 3d_fullres -np 4 #--verify_dataset_integ
 # step 3
 # nnUNetv2_predict -i /home/rgu/Documents/UK\ dataset/nnUNet_testing -o /home/rgu/Documents/UK\ dataset/nnUNet_raw/testing_dual_label -d 101 -chk checkpoint_best.pth -c 3d_fullres -f all -device 'cuda'
 # nnUNetv2_predict -i /home/rgu/Documents/UK\ dataset/nnUNet_testing -o /home/rgu/Documents/UK\ dataset/nnUNet_raw/testing_ps -d 104 -c 3d_fullres -f 5 
+nnUNetv2_predict -i /home/rgu/Documents/UK\ dataset/nnUNet_testing -o /home/rgu/Documents/UK\ dataset/nnUNet_raw/testing_1214 -d 1000 -chk checkpoint_best.pth -c 3d_fullres -f 4 -device 'cuda'
 
 

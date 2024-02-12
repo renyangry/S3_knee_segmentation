@@ -26,9 +26,12 @@ def train_ssm(bone, leg_list, fixed_anatomy, model, warped_train_dir, results_di
         moving_img = ants.image_read(filename_tr)
         moving_mask_img = ants.utils.get_mask(moving_img, label, label+1)
         moving_left_femur = ants.utils.crop_image(moving_mask_img, moving_mask_img)
-
+        #
+        fixed_surface = generate_surface_img(moving_left_femur.numpy())
+        moving_left_femur_surf = transform_numpy2ants(moving_img, fixed_surface)
+        #
         start_time = time.time()
-        outs = model.reg(fixed_anatomy, moving_left_femur)
+        outs = model.reg(fixed_anatomy, moving_left_femur_surf) # moving_left_femur
         end_time = time.time()
         minutes, seconds = compute_efficiency(start_time, end_time)
         # print(f"Training Elapsed time: {minutes} minutes {seconds} seconds")
@@ -38,7 +41,7 @@ def train_ssm(bone, leg_list, fixed_anatomy, model, warped_train_dir, results_di
 
         warped_img = outs['warpedmovout']
         ants.image_write(warped_img, warped_train_dir + os.path.basename(filename_tr))
-        # print(os.path.basename(filename_tr) + ' is done')
+        print(f'{os.path.basename(filename_tr)} is warped...')
     print('registration of training images is done...')
 
     print('building SSM...')

@@ -3,8 +3,8 @@
 import os
 import ants
 import numpy as np
-from ssm_utils import *
-from ssm_config import *
+from image_based_ssm.ssm_utils import *
+from image_based_ssm.ssm_config import *
 import nibabel as nib
 from scipy.ndimage import distance_transform_edt
 import SimpleITK as sitk
@@ -19,9 +19,11 @@ def distance_to_line(point, line_point1, line_point2):
     return distance
 
 
+out_dir = '/home/rgu/Documents/surgical_planning'
+os.mkdir(out_dir, exist_ok=True)
 #------------------------------------------------------------------------------------------------------------#
-if not os.path.exists(os.path.join(OUT_DIR, 'surgical_plan_coordinates.csv')):
-    with open(os.path.join(OUT_DIR, 'surgical_plan_coordinates.csv'), 'w') as f:
+if not os.path.exists(os.path.join(out_dir, 'surgical_plan_coordinates.csv')):
+    with open(os.path.join(out_dir, 'surgical_plan_coordinates.csv'), 'w') as f:
         f.write('FILENAME,INPUT TYPE,FEMUR WIDTH,FEMUR HEAD,ME,LE,IMPLANT\n')
 
 bone = "left_femur"
@@ -120,7 +122,7 @@ implant_seg[:, :, 0:volume_slice] = distal_femur
 
 #------------------------------------------------------------------------------------------------------------#
 # save these landmark coordinates in file
-with open(os.path.join(OUT_DIR, 'surgical_plan_coordinates.csv'), 'a') as f:
+with open(os.path.join(out_dir, 'surgical_plan_coordinates.csv'), 'a') as f:
     f.write(f'{filename},{cond},{max_diameter},{str(femur_head_centre)},{str(max_diameter_coordinates[0])},{str(max_diameter_coordinates[1])},{str(tuple(coordinates_int))}\n')
 
 #------------------------------------------------------------------------------------------------------------#
@@ -132,5 +134,5 @@ plt.scatter(point2[0], rotated_image.shape[0] - point2[1], color='blue', marker=
 plt.scatter(shortest_distance_coordinates[0], rotated_image.shape[0] - shortest_distance_coordinates[1], color='green', marker='x', label='Implant Center')
 plt.plot([point1[0], point2[0]], [rotated_image.shape[0] - point1[1], rotated_image.shape[0] - point2[1]], color='yellow', linestyle='--', label='Femur Width')
 plt.legend(loc='upper right')
-plt.savefig(os.path.join(OUT_DIR, filename + '.png'), bbox_inches='tight')
+plt.savefig(os.path.join(out_dir, filename + '.png'), bbox_inches='tight')
 plt.show()

@@ -96,10 +96,6 @@ def test_ssm_surgical_plan(model_dir, fixed_anatomy, testing_dir, warped_test_di
         rec_img = nib.Nifti1Image(rec, test.affine, test.header)
         nib.save(rec_img, os.path.join(results_dir, 'rec_'+filename_wrap))
 
-        ## implant = rec-test_data
-        ## implant_img = nib.Nifti1Image(implant, test.affine, test.header)
-        ## nib.save(implant_img, os.path.join(results_dir, 'implant_'+filename_wrap))
-
 
     print('converting the results back to original image space...')
     for filename_wrap in os.listdir(testing_dir):

@@ -10,7 +10,7 @@ import json
 # OnlyOnce
 check_path_exist(OUT_DIR)
 save_training_json(TRAIN_DIR, JSON_PATH)
-generate_fixed_image(ROOT_DIR)
+# generate_fixed_image(ROOT_DIR)
 
 bone = 'left_femur'
 # for bone in BONE_STRUCTURE:
@@ -22,7 +22,11 @@ check_path_exist(warped_train_dir)
 check_path_exist(results_dir)
 
 fixed_anatomy = ants.image_read(os.path.join(ROOT_DIR, bone + '.nii.gz'))
-model = RecSSM(30, fixed_anatomy.shape)
+#
+fixed_surface = generate_surface_img(fixed_anatomy.numpy())
+fixed_surface_img = transform_numpy2ants(fixed_anatomy, fixed_surface)
+# ants.image_write(fixed_surface_img, os.path.join(ROOT_DIR, bone + '_surface.nii.gz'))
+#
 
 with open(JSON_PATH, 'r') as f:
     training_dict = json.load(f)
@@ -32,7 +36,12 @@ with open(JSON_PATH, 'r') as f:
     else:
         leg_list = training_dict['right_leg_list']
 
-ssm_train.train_ssm(bone, leg_list, fixed_anatomy, model, warped_train_dir, results_dir)
+# model = RecSSM(len(leg_list), fixed_anatomy.shape)
+# ssm_train.train_ssm(bone, leg_list, fixed_anatomy, model, warped_train_dir, results_dir)
+#
+model = RecSSM(len(leg_list), fixed_surface_img.shape)
+ssm_train.train_ssm(bone, leg_list, fixed_surface_img, model, warped_train_dir, results_dir)
+#
 del model
 gc.collect()
     
