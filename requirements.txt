@@ -1,1 +1,18 @@
-# To ensure app dependencies are ported from your virtual environment/host machine into your container, run 'pip freeze > requirements.txt' in the terminal to overwrite this file
+antspyx
+nibabel
+SimpleITK
+numpy
+scikit-learn
+scikit-image
+scipy
+torch
+opencv-python
+matplotlib
+seaborn
+pandas
+nilearn
+trimesh
+pyvista
+mcubes
+pycpd
+nrrd

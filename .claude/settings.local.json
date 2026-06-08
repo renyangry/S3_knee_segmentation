@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(rm -rf /Users/rgu/Documents/GitHub/S3_knee_segmentation/image_based_ssm/home)",
+      "Bash(rm /Users/rgu/Documents/GitHub/S3_knee_segmentation/mesh_ssm/.nnunet_training.sh.swp)",
+      "Bash(rm /Users/rgu/Documents/GitHub/S3_knee_segmentation/image_based_ssm/train.py \\\\ *)"
+    ],
+    "additionalDirectories": [
+      "/Users/rgu/Documents/GitHub/S3_knee_segmentation/image_based_ssm"
+    ]
+  }
+}
