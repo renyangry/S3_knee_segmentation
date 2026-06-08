@@ -31,9 +31,6 @@ Full-leg CT (DICOM)
    - Distal femur condyle landmark detection
    - Automatic implant centre localisation
 ```
-
-An alternative **mesh-based SSM** (`mesh_ssm/`) and a **mobile movement prediction** module (`mobile_movement/`) are also included as described in the paper.
-
 ---
 
 ## Repository Structure
@@ -117,7 +114,7 @@ If you use this code, please cite:
 
 ```
 @article{s3_knee_2026,
-  title   = {[Paper title]},
+  title   = {A Clinical Applicable Study on Lower Limb Segmentation From CT Images for Total Knee Arthroplasty},
   journal = {The Knee},
   year    = {2026},
   doi     = {10.1016/S0968-0160(26)00206-1}
